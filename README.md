@@ -1,3 +1,2 @@
-# WEB Project Part 1
+# WEB Project Part 2
 Yevgeni Boukingolts 321328239
-
