@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../static/style.css">
+    <script src="../code.js" defer></script>
+</head>
+<body onload="start_page()">
+<header>
+    <img class="logo" src="../static/images/logo.png" onmouseover="this.src='../static/images/logo-white.png'" onmouseleave="this.src='../static/images/logo.png'">
+    <div class="account-bar">
+        <a href="#" class="login" onclick="switch_login()">
+            <h2>התחבר</h2>
+        </a>
+        <a href="#" class="signup" onclick="switch_register()">
+            <h2>הרשם</h2>
+        </a>
+    </div>
+</header>
+    <img class="big-logo" src="../static/images/logo.png">
+<article>
+
+    <form class="signup" action="layout.html" method="POST">
+        <h1 class="message" onclick="open_register()">התחברות</h1>
+        <div class="line">
+            <label>אימייל:</label>
+            <input name="email" type="email" placeholder="אימייל" required>
+        </div>
+        <div class="line">
+            <label>סיסמה:</label>
+            <input name="password" type="password" placeholder="סיסמה" required>
+        </div>
+        <div class="line" id="dynamic-line1">
+            <label>טלפון:</label>
+            <input name="phone" type="tel" placeholder="מספר טלפון">
+        </div>
+        <div class="line" id="dynamic-line2">
+            <label>שם:</label>
+            <input name="name" type="text" placeholder="שם פרטי">
+        </div>
+        <button class="submit" type="submit">שלח︎</button>
+        <br>
+        <div class="extra-options">
+            <a href="#" class="link account-exist" onclick="switch_login()">אני כבר רשום</a>
+        </div>
+    </form>
+</article>
+</body>
+</html>
