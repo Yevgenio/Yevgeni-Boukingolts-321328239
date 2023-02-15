@@ -50,6 +50,11 @@ aside {
 
 }
 
+td {
+    border: 2px solid black;
+    color: black;
+}
+
 
 li {
     padding: 0.1em;
@@ -204,8 +209,8 @@ footer a {
 }
 
 .user-profile img {
-    max-width: 50%;
-    max-height: 50%;
+    max-width: 10em;
+    max-height: 10em;
     border-radius: 50%;
     border: 2px solid var(--color-high); 
 }

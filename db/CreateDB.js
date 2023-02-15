@@ -1,6 +1,7 @@
 var SQL = require('./db');
 const path = require('path');
 const csv=require('csvtojson');
+const server_side = require('../static/server_side');
 
 //create user table
 const create_users = (req,res,next)=> {
@@ -146,6 +147,51 @@ const insert_likes = (req,res)=>{
     res.send("data inserted");
 };
 
+const read_users = (req,res)=>{
+    var Q2 = "SELECT * FROM users";
+    SQL.query(Q2, (err,mysqlres)=>{
+        if (err) {
+            console.log("error in inserting data", err);
+        }
+        const variables = { 
+            v1: mysqlres,
+            title: 'users',
+            ...server_side.layout_variables(req)
+      }
+      res.render('read', variables);
+    });
+}
+
+const read_posts = (req,res)=>{
+    var Q2 = "SELECT * FROM posts";
+    SQL.query(Q2, (err,mysqlres)=>{
+        if (err) {
+            console.log("error in inserting data", err);
+        }
+        const variables = { 
+            v1: mysqlres,
+            title: 'posts',
+            ...server_side.layout_variables(req)
+      }
+      res.render('read', variables);
+    });
+}
+
+const read_likes = (req,res)=>{
+    var Q2 = "SELECT * FROM likes";
+    SQL.query(Q2, (err,mysqlres)=>{
+        if (err) {
+            console.log("error in inserting data", err);
+        }
+        const variables = { 
+            v1: mysqlres,
+            title: 'likes',
+            ...server_side.layout_variables(req)
+      }
+      res.render('read', variables);
+    });
+}
+
 const drop_users = (req, res)=>{
     const table_name = "users"
     var Q4 = "DROP TABLE " + table_name;
@@ -198,6 +244,9 @@ module.exports = {
     insert_users,
     insert_posts,
     insert_likes,
+    read_users,
+    read_posts,
+    read_likes,
     drop_users, 
     drop_posts,
     drop_likes};

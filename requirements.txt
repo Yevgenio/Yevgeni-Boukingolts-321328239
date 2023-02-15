@@ -1,8 +1,7 @@
 nph init
+npm i express path mysql2 body-parser pug cookie-parser csvtojson multer express-fileupload --save
 npm i express path mysql2 body-parser pug cookie-parser --save
 npm i nodemon -g
-npm i csvtojson --save 
-npm install express-fileupload
 
 http://localhost:3000/create_users
 http://localhost:3000/insert_users
@@ -10,7 +9,9 @@ http://localhost:3000/create_posts
 http://localhost:3000/insert_posts
 http://localhost:3000/create_likes
 http://localhost:3000/insert_likes
-
+http://localhost:3000/read_users
+http://localhost:3000/read_posts
+http://localhost:3000/read_likes
 http://localhost:3000/drop_likes
 http://localhost:3000/drop_posts
 http://localhost:3000/drop_users

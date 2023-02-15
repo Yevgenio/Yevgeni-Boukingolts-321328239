@@ -39,13 +39,21 @@ app.get('/events', CRUD.showEvents);
 app.get('/fresh', CRUD.showFresh);
 
 app.get('/login', (req,res)=>{
-    res.render('login', server_side.layout_variables(req));
+    const variables = { 
+        title: 'Login',
+        ...server_side.layout_variables(req)
+  }
+    res.render('login', variables);
 });
 
 app.post('/UserLogin', CRUD.UserLogin);
 
 app.get('/signup', (req,res)=>{
-    res.render('signup', server_side.layout_variables(req));
+    const variables = { 
+        title: 'Signup',
+        ...server_side.layout_variables(req)
+  }
+    res.render('signup', variables);
 });
 
 app.post('/UserSignUp', CRUD.UserSignUp);
@@ -60,8 +68,6 @@ app.get('/settings', CRUD.UpdateUser);
 
 app.post('/UserUpdated', upload.single("avatar"), CRUD.UserUpdated);
 
-
-
 app.get('/post/:id', CRUD.goToPost);
 
 app.post('/postComment', CRUD.postComment);
@@ -73,16 +79,19 @@ app.post('/removeLike', CRUD.removeLike);
 app.get('/search', CRUD.search);
 
 // cretae DB
-// app.get('/createTables', CreateDB.CreateTable);
 app.get('/create_users', CreateDB.create_users);
 app.get('/create_posts', CreateDB.create_posts);
 app.get('/create_likes', CreateDB.create_likes);
 app.get('/insert_users', CreateDB.insert_users); 
 app.get('/insert_posts', CreateDB.insert_posts); 
 app.get('/insert_likes', CreateDB.insert_likes); 
+app.get('/read_users', CreateDB.read_users); 
+app.get('/read_posts', CreateDB.read_posts); 
+app.get('/read_likes', CreateDB.read_likes); 
 app.get('/drop_likes', CreateDB.drop_likes)
 app.get('/drop_posts', CreateDB.drop_posts)
 app.get('/drop_users', CreateDB.drop_users)
+
 
 app.listen(port,()=>{
     console.log("server is running on port ", port);

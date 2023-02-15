@@ -12,6 +12,12 @@ const UserSignUp = (req,res)=>{
       res.status(400).send('error' ,{message: "content cannot be empty"});
       return;
   }
+  var name = req.cookies.name;
+  var registered = true
+  if(name == undefined) {
+    name = 'unregistered'
+    registered = false
+  }
   const NewUserSignIn = {
       "name": req.body.name,
       "email": req.body.email,
@@ -62,7 +68,12 @@ const UserLogin = (req, res) => {
 };
 
 const UpdateUser = (req, res) => {
-  const name = req.cookies.name;
+  var name = req.cookies.name;
+  var registered = true
+  if(name == undefined) {
+    name = 'unregistered'
+    registered = false
+  }
   sql.query(
   'SELECT * FROM users WHERE name = ?',[name],(error, results) => {
     if (error) {
@@ -73,6 +84,7 @@ const UpdateUser = (req, res) => {
       const user = results[0];
       const variables = { 
           user: user,
+          registered: registered,
           ...server_side.layout_variables(req)
     }
     res.render('settings', variables);
@@ -148,6 +160,12 @@ const UserLogout = (req, res) => {
 //GROUP BY p.id) as posts
 
 const showAccount = (req,res) => {
+  var cookie_name = req.cookies.name;
+  var registered = true
+  if(cookie_name == undefined) {
+    cookie_name = 'unregistered'
+    registered = false
+  }
   const { name } = req.params;
   
   sql.query(`   
@@ -164,7 +182,11 @@ const showAccount = (req,res) => {
       FROM (
         SELECT p.*, COUNT(r.reply_id) AS replies
         FROM (SELECT p.* , COUNT(l.post_id) AS likes
-              FROM posts p
+              FROM (SELECT p.*, COUNT(l.post_id) AS like_count, 
+                    CASE WHEN COUNT(l.post_id) > 0 THEN TRUE ELSE FALSE END AS liked_status
+                    FROM posts p
+                    LEFT JOIN likes l ON p.post_id = l.post_id AND l.name = ?
+                    GROUP BY p.post_id) p
               LEFT JOIN likes l ON p.post_id = l.post_id
               GROUP BY p.post_id) as p
         LEFT JOIN posts r ON p.post_id = r.reply_id
@@ -173,7 +195,7 @@ const showAccount = (req,res) => {
       JOIN users ON posts.name = users.name
       WHERE users.name = ?
       ORDER BY posts.date DESC`
-    sql.query(Q1,[name],(err, mysqlres)=>{
+    sql.query(Q1,[cookie_name,name],(err, mysqlres)=>{
     if (err) {
         console.log("error: error: ", err);
         res.status(400).send({message:"could not search user posts"});
@@ -182,6 +204,8 @@ const showAccount = (req,res) => {
     const variables = { 
           user: user,
           posts: mysqlres,
+          title: name,
+          registered: registered,
           ...server_side.layout_variables(req)
     }
     res.render('user', variables);
@@ -198,12 +222,22 @@ const showAccount = (req,res) => {
 // GROUP BY p.post_id;
 
 const showPosts = (req,res) => {
+  var name = req.cookies.name;
+  var registered = true
+  if(name == undefined) {
+    name = 'unregistered'
+    registered = false
+  }
   const Q1 = `
         SELECT * , TIMESTAMPDIFF(HOUR, posts.date, NOW()) AS time 
         FROM (
           SELECT p.*, COUNT(r.reply_id) AS replies
           FROM (SELECT p.* , COUNT(l.post_id) AS likes
-                FROM posts p
+                  FROM (SELECT p.*, COUNT(l.post_id) AS like_count, 
+                        CASE WHEN COUNT(l.post_id) > 0 THEN TRUE ELSE FALSE END AS liked_status
+                        FROM posts p
+                        LEFT JOIN likes l ON p.post_id = l.post_id AND l.name = ?
+                        GROUP BY p.post_id) p
                 LEFT JOIN likes l ON p.post_id = l.post_id
                 GROUP BY p.post_id) p
           LEFT JOIN posts r ON p.post_id = r.reply_id
@@ -211,13 +245,15 @@ const showPosts = (req,res) => {
         ) as posts 
         JOIN users ON posts.name = users.name
         ORDER BY posts.date DESC`
-  sql.query(Q1,(err, mysqlres)=>{
+  sql.query(Q1,name,(err, mysqlres)=>{
       if (err) {
           console.log("error: error: ", err);
-          res.status(400).send({message:"could not search posts"});
+          res.status(400).send({message:"could not search posts"}); 
           return;
       }
       const variables = { posts: mysqlres,
+        title: 'Home',
+        registered: registered,
         ...server_side.layout_variables(req)
       }
       res.render('main', variables);
@@ -226,12 +262,22 @@ const showPosts = (req,res) => {
 }
 
 const showTrending = (req,res) => {
+  var name = req.cookies.name;
+  var registered = true
+  if(name == undefined) {
+    name = 'unregistered'
+    registered = false
+  }
   const Q1 = `
         SELECT * , TIMESTAMPDIFF(HOUR, posts.date, NOW()) AS time 
         FROM (
           SELECT p.*, COUNT(r.reply_id) AS replies
           FROM (SELECT p.* , COUNT(l.post_id) AS likes
-                FROM posts p
+                FROM (SELECT p.*, COUNT(l.post_id) AS like_count, 
+                      CASE WHEN COUNT(l.post_id) > 0 THEN TRUE ELSE FALSE END AS liked_status
+                      FROM posts p
+                      LEFT JOIN likes l ON p.post_id = l.post_id AND l.name = ?
+                      GROUP BY p.post_id) p
                 LEFT JOIN likes l ON p.post_id = l.post_id
                 GROUP BY p.post_id) p
           LEFT JOIN posts r ON p.post_id = r.reply_id
@@ -239,13 +285,15 @@ const showTrending = (req,res) => {
         ) as posts 
         JOIN users ON posts.name = users.name
         ORDER BY posts.likes DESC`
-  sql.query(Q1,(err, mysqlres)=>{
+  sql.query(Q1,name,(err, mysqlres)=>{
       if (err) {
           console.log("error: error: ", err);
           res.status(400).send({message:"could not search posts"});
           return;
       }
       const variables = { posts: mysqlres,
+        title: 'Trending',
+        registered: registered,
         ...server_side.layout_variables(req)
       }
       res.render('main', variables);
@@ -254,12 +302,22 @@ const showTrending = (req,res) => {
 }
 
 const showEvents = (req,res) => {
+  var name = req.cookies.name;
+  var registered = true
+  if(name == undefined) {
+    name = 'unregistered'
+    registered = false
+  }
   const Q1 = `
         SELECT * , TIMESTAMPDIFF(HOUR, posts.date, NOW()) AS time 
         FROM (
           SELECT p.*, COUNT(r.reply_id) AS replies
           FROM (SELECT p.* , COUNT(l.post_id) AS likes
-                FROM posts p
+                FROM (SELECT p.*, COUNT(l.post_id) AS like_count, 
+                      CASE WHEN COUNT(l.post_id) > 0 THEN TRUE ELSE FALSE END AS liked_status
+                      FROM posts p
+                      LEFT JOIN likes l ON p.post_id = l.post_id AND l.name = ?
+                      GROUP BY p.post_id) p
                 LEFT JOIN likes l ON p.post_id = l.post_id
                 GROUP BY p.post_id) p
           LEFT JOIN posts r ON p.post_id = r.reply_id
@@ -267,13 +325,15 @@ const showEvents = (req,res) => {
         ) as posts 
         JOIN users ON posts.name = users.name
         ORDER BY posts.replies DESC`
-  sql.query(Q1,(err, mysqlres)=>{
+  sql.query(Q1,name,(err, mysqlres)=>{
       if (err) {
           console.log("error: error: ", err);
           res.status(400).send({message:"could not search posts"});
           return;
       }
       const variables = { posts: mysqlres,
+        title: 'Events',
+        registered: registered,
         ...server_side.layout_variables(req)
       }
       res.render('main', variables);
@@ -282,12 +342,22 @@ const showEvents = (req,res) => {
 }
 
 const showFresh = (req,res) => {
+  var name = req.cookies.name;
+  var registered = true
+  if(name == undefined) {
+    name = 'unregistered'
+    registered = false
+  }
   const Q1 = `
         SELECT * , TIMESTAMPDIFF(HOUR, posts.date, NOW()) AS time 
         FROM (
           SELECT p.*, COUNT(r.reply_id) AS replies
           FROM (SELECT p.* , COUNT(l.post_id) AS likes
-                FROM posts p
+                FROM (SELECT p.*, COUNT(l.post_id) AS like_count, 
+                      CASE WHEN COUNT(l.post_id) > 0 THEN TRUE ELSE FALSE END AS liked_status
+                      FROM posts p
+                      LEFT JOIN likes l ON p.post_id = l.post_id AND l.name = ?
+                      GROUP BY p.post_id) p
                 LEFT JOIN likes l ON p.post_id = l.post_id
                 GROUP BY p.post_id) p
           LEFT JOIN posts r ON p.post_id = r.reply_id
@@ -295,13 +365,15 @@ const showFresh = (req,res) => {
         ) as posts 
         JOIN users ON posts.name = users.name
         WHERE posts.replies = 0 AND posts.likes = 0`
-  sql.query(Q1,(err, mysqlres)=>{
+  sql.query(Q1,name,(err, mysqlres)=>{
       if (err) {
           console.log("error: error: ", err);
           res.status(400).send({message:"could not search posts"});
           return;
       }
       const variables = { posts: mysqlres,
+        title: 'Fresh',
+        registered: registered,
         ...server_side.layout_variables(req)
       }
       res.render('main', variables);
@@ -311,13 +383,23 @@ const showFresh = (req,res) => {
 
 
 const goToPost = (req,res) => {
+  var name = req.cookies.name;
+  var registered = true
+  if(name == undefined) {
+    name = 'unregistered'
+    registered = false
+  }
   const { id } = req.params;
   const Q1 = `
     SELECT * , DATE_FORMAT(posts.date, '%Y-%m-%d %H:%i') AS time 
     FROM (
       SELECT p.*, COUNT(r.reply_id) AS replies
       FROM (SELECT p.* , COUNT(l.post_id) AS likes
-            FROM posts p
+            FROM (SELECT p.*, COUNT(l.post_id) AS like_count, 
+                  CASE WHEN COUNT(l.post_id) > 0 THEN TRUE ELSE FALSE END AS liked_status
+                  FROM posts p
+                  LEFT JOIN likes l ON p.post_id = l.post_id AND l.name = ?
+                  GROUP BY p.post_id) p
             LEFT JOIN likes l ON p.post_id = l.post_id
             GROUP BY p.post_id) p
       LEFT JOIN posts r ON p.post_id = r.reply_id
@@ -325,7 +407,7 @@ const goToPost = (req,res) => {
     ) as posts  
     JOIN users ON posts.name = users.name 
     WHERE post_id = ?`
-    sql.query(Q1,[id],(error, results) => {
+    sql.query(Q1,[name,id],(error, results) => {
     if (error) {
       res.status(500).send('An error occurred while fetching user');
     } else if (results.length === 0) {
@@ -337,7 +419,11 @@ const goToPost = (req,res) => {
         FROM (
           SELECT p.*, COUNT(r.reply_id) AS replies
           FROM (SELECT p.* , COUNT(l.post_id) AS likes
-                FROM posts p
+                FROM (SELECT p.*, COUNT(l.post_id) AS like_count, 
+                      CASE WHEN COUNT(l.post_id) > 0 THEN TRUE ELSE FALSE END AS liked_status
+                      FROM posts p
+                      LEFT JOIN likes l ON p.post_id = l.post_id AND l.name = ?
+                      GROUP BY p.post_id) p
                 LEFT JOIN likes l ON p.post_id = l.post_id
                 GROUP BY p.post_id) p
           LEFT JOIN posts r ON p.post_id = r.reply_id
@@ -346,7 +432,7 @@ const goToPost = (req,res) => {
         JOIN users ON posts.name = users.name
         WHERE reply_id = ?
         ORDER BY posts.date DESC`
-      sql.query(Q1,[id],(err, mysqlres)=>{
+      sql.query(Q1,[name,id],(err, mysqlres)=>{
       if (err) {
           console.log("error: error: ", err);
           res.status(400).send({message:"could not search posts"});
@@ -355,6 +441,8 @@ const goToPost = (req,res) => {
       const variables = { 
         post: post,
         posts: mysqlres,
+        title: 'post '+ id,
+        registered: registered,
         ...server_side.layout_variables(req)
       }
       res.render('post', variables);
@@ -366,7 +454,12 @@ const goToPost = (req,res) => {
 }
 
 const showNotifications = (req,res) => {
-  const name = req.cookies.name;
+  var name = req.cookies.name;
+  var registered = true
+  if(name == undefined) {
+    name = 'unregistered'
+    registered = false
+  }
   const Q1 = `
         SELECT users_reply.name AS name, 
                 users_reply.avatar AS avatar, 
@@ -385,6 +478,8 @@ const showNotifications = (req,res) => {
           return;
       }
       const variables = { notifications: mysqlres,
+        title: 'Notifications',
+        registered: registered,
         ...server_side.layout_variables(req)
       }
       res.render('notifications', variables);
@@ -398,13 +493,18 @@ const postComment = (req,res)=>{
       res.status(400).send('error' ,{message: "content cannot be empty"});
       return;
   }
-
-
-const newPost = {
-      "reply_id": req.body.reply_id,
-      "name": req.cookies.name,
-      "message": req.body.message,
+  var name = req.cookies.name;
+  var registered = true
+  if(name == undefined) {
+    name = 'unregistered'
+    registered = false
   }
+
+  const newPost = {
+        "reply_id": req.body.reply_id,
+        "name": name,
+        "message": req.body.message,
+    }
 
   // run qury
   const Q1 = 'INSERT INTO posts SET ?';
@@ -426,13 +526,50 @@ const leaveLike = (req,res)=>{
       res.status(400).send('error' ,{message: "content cannot be empty"});
       return;
   }
-
+  var name = req.cookies.name;
+  var registered = true
+  if(name == undefined) {
+    name = 'unregistered'
+    registered = false
+  }
   const newPost = {
       "post_id": req.body.post_id,
-      "name": req.cookies.name,
+      "name": name,
   }
+  console.log(newPost)
   const Q1 = 'INSERT INTO likes SET ?';
   sql.query(Q1, newPost, (err, mysqlres) =>{
+      if (err) {
+          console.log("error: error: ", err);
+          res.status(400).render('error' , {message:"could not submit post"});
+          res.redirect(req.get('referer'));
+          return;
+      }
+      res.redirect(req.get('referer'));
+      // res.redirect('back');
+      // res.redirect('/home');
+      return;
+  })
+};
+
+const removeLike = (req,res)=>{
+  // validate body exists
+  if (!req.body) {
+      res.status(400).send('error' ,{message: "content cannot be empty"});
+      return;
+  }
+  
+  const { post_id } = req.body
+  var name = req.cookies.name;
+  var registered = true
+  if(name == undefined) {
+    name = 'unregistered'
+    registered = false
+  }
+
+  const Q1 = `DELETE FROM likes
+              WHERE post_id = ? AND name = ?`;
+  sql.query(Q1, [post_id, name], (err, mysqlres) =>{
       if (err) {
           console.log("error: error: ", err);
           res.status(400).render('error' , {message:"could not submit post"});
@@ -452,9 +589,13 @@ const search = (req,res) => {
     res.status(400).send('error' ,{message: "content cannot be empty"});
     return;
   } 
-
   const search = req.query.value;
-  console.log(search)
+  var name = req.cookies.name;
+  var registered = true
+  if(name == undefined) {
+    name = 'unregistered'
+    registered = false
+  }
   const Q1 = `
         SELECT * FROM posts JOIN users ON posts.name = users.name
         WHERE posts.name LIKE ? OR posts.message LIKE ?
@@ -466,6 +607,8 @@ const search = (req,res) => {
           return;
       }
       const variables = { posts: mysqlres,
+        title: 'Search',
+        registered: registered,
         ...server_side.layout_variables(req)
       }
       res.render('main', variables);
@@ -488,6 +631,7 @@ module.exports = {
   UserUpdated,
   showNotifications,
   leaveLike,
+  removeLike,
   search
 };
 

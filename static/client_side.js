@@ -27,13 +27,16 @@ searchBar.addEventListener('click', function() {
     });
   });
 
-var form = document.querySelector('.post-btn #like');
-var input = form.querySelector('a');
+var form = document.querySelectorAll('.post-btn .like');
+// var input = form.querySelector('a');
 
-input.addEventListener('click', function(event) {
-  event.preventDefault();
-  form.submit();
-});
+form.forEach(function(item) {
+    var input = item.querySelector('a');
+    input.addEventListener('click', function(event) {
+        event.preventDefault();
+        item.submit();
+    });
+});    
 
 var navLinks = document.querySelectorAll('a');
 

@@ -1,10 +1,11 @@
 extends layout 
 block content 
-    each n in notifications
-        .notification
-            a(href='/user/'+n.name)
-                img(src='../images/' + n.avatar + '.png' alt='Avatar')
-            a(href='/user/'+n.name) 
-                h3 #{n.name}
-            a(href='/post/'+n.post_id) 
-                h3 has replied to your post #{n.time} hours ago.
+    if registered
+        each n in notifications
+            .notification
+                a(href='/user/'+n.name)
+                    img(src='../images/' + n.avatar + '.png' alt='Avatar')
+                a(href='/user/'+n.name) 
+                    h3 #{n.name}
+                a(href='/post/'+n.post_id) 
+                    h3 has replied to your post #{n.time} hours ago.

@@ -17,9 +17,15 @@ block content
             .post-footer
                 .post-btn 
                     a(href='/post/'+n.post_id) Enter
-                .post-btn
-                    form(id="like" action='/leaveLike' method='post')
-                        input(type="hidden" name="post_id" value=n.post_id)
-                        a(href='/#') Like
+                if registered    
+                    .post-btn
+                        if n.liked_status
+                            form(class="like" action='/removeLike' method='post')
+                                input(type="hidden" name="post_id" value=n.post_id)
+                                a(href='/#') Unlike
+                        else 
+                            form(class="like" action='/leaveLike' method='post')
+                                input(type="hidden" name="post_id" value=n.post_id)
+                                a(href='/#') Like
                 .post-btn #{n.likes} Likes
                 .post-btn #{n.replies} Replies
