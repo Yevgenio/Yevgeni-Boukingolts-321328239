@@ -1,0 +1,44 @@
+extends layout 
+block content 
+    .post
+        .post-header
+            a(href='/user/'+post.name)
+                    img(src='../images/' + post.avatar + '.png' alt='Avatar')
+            .poster
+                a(href='/user/'+post.name) #{post.name}
+                p #{post.time}
+        .post-message #{post.message}
+        .post-footer
+            .post-btn
+                form(id="like" action='/leaveLike' method='post')
+                    input(type="hidden" name="post_id" value=post.post_id)
+                    a(href='/#') Like
+            .post-btn #{post.likes} Likes
+            .post-btn #{post.replies} Replies
+    .write-comment(onclick="open_textbox()")
+        h2 Write a comment
+        br
+        form(action='/postComment' method='post')
+            input(type="hidden" name="reply_id" value=post.post_id)
+            textarea(name='message' placeholder='message' required)
+            br
+            button(type="submit") Comment 
+    each n in posts
+        .post
+            .post-header
+                a(href='/user/'+n.name)
+                    img(src='../images/' + n.avatar + '.png' alt='Avatar')
+                .poster
+                    a(href='/user/'+n.name) #{n.text} #{n.name}
+                    p #{n.time} hours ago.
+            a(href='/post/'+n.post_id)
+                .post-message #{n.message}
+            .post-footer
+                .post-btn 
+                    a(href='/post/'+n.post_id) Enter
+                .post-btn
+                    form(id="like" action='/leaveLike' method='post')
+                        input(type="hidden" name="post_id" value=n.post_id)
+                        a(href='/#') Like
+                .post-btn #{n.likes} Likes
+                .post-btn #{n.replies} Replies

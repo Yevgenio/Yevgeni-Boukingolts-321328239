@@ -1,0 +1,21 @@
+extends layout 
+block content 
+    .user-profile
+        img(src='../images/' + user.avatar + '.png' alt='Avatar')
+        //-  enctype="multipart/form-data")
+        h1 #{user.name}
+        form(action='/UserUpdated' method='post' enctype="multipart/form-data") 
+            input(type="hidden" name="name" value=user.name)
+            label(for='password') Password:
+            input(name='password' type='password' placeholder='password' value=user.password required)
+            br
+            label(for='email') Email:
+            input(name='email' type='email' placeholder='email' value=user.email required)
+            br
+            label(for='phone') Phone Number:
+            input(name='phone' type='tel' placeholder='phone' value=user.phone required)
+            br
+            label(for="image") Profile Picture:
+            input(type="file" name="avatar" id="avatar" accept=".png")
+            br
+            button(type="submit", value="Update") Update

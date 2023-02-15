@@ -1,0 +1,40 @@
+nph init
+npm i express path mysql2 body-parser pug cookie-parser --save
+npm i nodemon -g
+npm i csvtojson --save 
+npm install express-fileupload
+
+http://localhost:3000/create_users
+http://localhost:3000/insert_users
+http://localhost:3000/create_posts
+http://localhost:3000/insert_posts
+http://localhost:3000/create_likes
+http://localhost:3000/insert_likes
+
+http://localhost:3000/drop_likes
+http://localhost:3000/drop_posts
+http://localhost:3000/drop_users
+
+CREATE TABLE IF NOT EXISTS users (
+    name VARCHAR(255) PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    avatar VARCHAR(50) NOT NULL,
+    created DATETIME DEFAULT CURRENT_TIMESTAMP
+)
+
+CREATE TABLE IF NOT EXISTS posts (
+    post_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    reply_id INT,
+    FOREIGN KEY (name) REFERENCES users (name)
+)
+
+CREATE TABLE likes (
+    post_id INT,
+    name VARCHAR(50),
+    PRIMARY KEY (post_id, name)
+)

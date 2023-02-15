@@ -1,0 +1,35 @@
+doctype html
+html(lang="en")
+    head
+        meta(charset="UTF-8")
+        meta(http-equiv="X-UA-Compatible", content="IE=edge")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        link(rel="stylesheet", href="../style.css")
+        script(src="../client_side.js", defer) 
+        title #{page_name}
+    body 
+        nav
+            br
+            ul 
+                each n in nav_list
+                    li  
+                        a(href=n.route) #{n.text}
+        aside
+            br
+            ul 
+                each n in aside_list
+                    li  
+                        a(href=n.route) #{n.text}
+        header
+            br  
+            form(id='search-bar' action='/search' method='get')
+                input(id='search-input' name="value" type='text')
+                button(type='submit') Search
+        main
+            block content
+        footer 
+            br
+            ul 
+                each n in footer_list
+                    li.inline-list
+                        a(href=n.route) #{n.text}

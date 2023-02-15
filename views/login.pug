@@ -1,0 +1,13 @@
+extends layout 
+block content 
+    .signup-form
+      h1 Login to your account.
+      br
+      form(action='/UserLogin' method='post')
+        label(for='name') Username:
+        input(name='name' type='text' placeholder='username' required)
+        br
+        label(for='password') Password:
+        input(name='password' type='password' placeholder='password' required)
+        br
+        button(type="submit", value="Send") Send 
