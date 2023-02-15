@@ -68,6 +68,8 @@ app.post('/postComment', CRUD.postComment);
 
 app.post('/leaveLike', CRUD.leaveLike);
 
+app.post('/removeLike', CRUD.removeLike);
+
 app.get('/search', CRUD.search);
 
 // cretae DB
